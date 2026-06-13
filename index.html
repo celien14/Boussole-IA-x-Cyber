@@ -1,0 +1,851 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Boussole IA × Cyber — par Célien Leroy</title>
+  <meta name="description" content="Outil d'aide à la décision pour RSSI : où l'IA s'applique en cybersécurité (offensif et défensif), comment la déployer, et quelle option souveraine selon votre niveau de contrainte. Chaque chiffre est sourcé.">
+  <meta name="author" content="Célien Leroy">
+  <meta name="theme-color" content="#0a0a0c">
+
+  <meta property="og:type" content="website">
+  <meta property="og:title" content="Boussole IA × Cyber — par Célien Leroy">
+  <meta property="og:description" content="Où l'IA s'applique en cybersécurité, offensif comme défensif, et quelle option souveraine selon votre contrainte. TPRM, SOC, EASM, pentest, conformité — avec un Top 5 souverain par domaine.">
+  <meta property="og:locale" content="fr_FR">
+
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:title" content="Boussole IA × Cyber — par Célien Leroy">
+  <meta name="twitter:description" content="Où l'IA s'applique en cybersécurité, offensif comme défensif, et quelle option souveraine selon votre contrainte.">
+
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap');
+
+  :root{
+    --bg:#0a0a0c;
+    --panel:#131318; --panel-2:#101015; --panel-3:#0f0f14;
+    --line:#232330; --line-soft:#1b1b24; --line-hover:#34344a;
+    --ink:#ededf0; --ink-dim:#9b9ba6; --ink-faint:#6a6a78;
+    --accent:#8a8af6; --accent-soft:rgba(138,138,246,.12);
+    --signal:var(--accent);
+    --offensive:#f08a7d; --defensive:#8fb8f6;
+    --sov-1:#5fd4b4; --sov-2:#dfb95f; --sov-3:#ee7e97;
+    --r:10px;
+    --hl:inset 0 1px 0 rgba(255,255,255,.045);
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  html{scroll-behavior:smooth}
+  body{
+    background:
+      radial-gradient(900px 420px at 70% -16%, rgba(138,138,246,.07), transparent 60%),
+      var(--bg);
+    color:var(--ink);font-family:'Inter',system-ui,sans-serif;line-height:1.58;
+    min-height:100vh;-webkit-font-smoothing:antialiased;font-size:15px;
+  }
+  .wrap{max-width:1060px;margin:0 auto;padding:0 24px}
+  ::selection{background:rgba(138,138,246,.28)}
+
+  /* ---------- header ---------- */
+  header{border-bottom:1px solid var(--line-soft);padding:40px 0 32px}
+  .eyebrow{
+    font-family:'JetBrains Mono',monospace;font-size:10.5px;letter-spacing:.28em;
+    text-transform:uppercase;color:var(--accent);display:flex;align-items:center;gap:10px;
+  }
+  .eyebrow::before{content:"";width:22px;height:1px;background:var(--accent);opacity:.7}
+  h1{
+    font-family:'Inter',sans-serif;font-weight:700;
+    font-size:clamp(30px,4.6vw,48px);letter-spacing:-.035em;line-height:1.04;margin:18px 0 12px;
+    color:#f4f4f6;
+  }
+  h1 .x{color:var(--accent);font-weight:500;padding:0 .08em}
+  .sub{color:var(--ink-dim);max-width:660px;font-size:15px}
+  .byline{margin-top:20px;font-family:'JetBrains Mono',monospace;font-size:11.5px;color:var(--ink-faint);letter-spacing:.03em}
+  .byline b{color:var(--ink);font-weight:600}
+
+  /* ---------- controls ---------- */
+  .ctl-label{
+    font-family:'JetBrains Mono',monospace;font-size:10.5px;letter-spacing:.18em;
+    text-transform:uppercase;color:var(--ink-faint);margin-bottom:14px;
+    display:flex;align-items:center;gap:8px;
+  }
+  .ctl-label .step{
+    color:var(--accent);border:1px solid var(--line);border-radius:5px;padding:1px 6px;font-size:9.5px;
+    background:var(--panel-2);
+  }
+  .controls{padding:34px 0 8px}
+
+  .domains{display:grid;grid-template-columns:repeat(5,1fr);gap:8px;margin-bottom:36px}
+  .domain{
+    background:linear-gradient(180deg,var(--panel),var(--panel-2));
+    border:1px solid var(--line);border-radius:var(--r);
+    padding:15px 14px;cursor:pointer;text-align:left;
+    color:var(--ink);font-family:inherit;
+    transition:border-color .15s ease,box-shadow .15s ease,transform .15s ease;
+    position:relative;box-shadow:var(--hl);
+  }
+  .domain:hover{border-color:var(--line-hover);transform:translateY(-1px)}
+  .domain:active{transform:translateY(0)}
+  .domain:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+  .domain.active{
+    border-color:rgba(138,138,246,.65);
+    box-shadow:0 0 0 1px rgba(138,138,246,.25),0 8px 28px rgba(138,138,246,.10),var(--hl);
+  }
+  .domain .dname{font-weight:600;font-size:13.5px;letter-spacing:-.012em;margin-bottom:9px;line-height:1.2;color:#e8e8ee}
+  .tag{
+    font-family:'JetBrains Mono',monospace;font-size:8.5px;letter-spacing:.07em;
+    text-transform:uppercase;padding:2.5px 8px;border-radius:5px;display:inline-block;
+    border:1px solid var(--line);color:var(--ink-faint);background:var(--panel-3);
+  }
+  .domain.active .tag.off{color:var(--offensive);border-color:rgba(240,138,125,.4)}
+  .domain.active .tag.def{color:var(--defensive);border-color:rgba(143,184,246,.4)}
+  .domain.active .tag.both{color:var(--accent);border-color:rgba(138,138,246,.4)}
+
+  /* ---------- sovereignty ---------- */
+  .sov-block{
+    background:linear-gradient(180deg,var(--panel-2),var(--panel-3));
+    border:1px solid var(--line);border-radius:14px;padding:26px 28px;margin-bottom:34px;
+    box-shadow:var(--hl);
+  }
+  .sov-head{display:flex;justify-content:space-between;align-items:baseline;flex-wrap:wrap;gap:8px;margin-bottom:22px}
+  .sov-head h3{font-weight:600;font-size:15px;letter-spacing:-.015em;color:#e8e8ee}
+  .sov-state{font-family:'JetBrains Mono',monospace;font-size:11px;font-weight:600;letter-spacing:.1em}
+
+  .slider-wrap{position:relative;padding:4px 0}
+  .slider-wrap .zone-mark{
+    position:absolute;top:50%;transform:translateY(-50%);width:2px;height:12px;border-radius:2px;
+    background:var(--bg);box-shadow:0 0 0 1px var(--line);pointer-events:none;
+  }
+  .slider-wrap .zone-mark.z1{left:33.33%} .slider-wrap .zone-mark.z2{left:66.66%}
+  input[type=range]{
+    -webkit-appearance:none;appearance:none;width:100%;height:5px;border-radius:5px;
+    background:linear-gradient(90deg,var(--sov-1) 0%,var(--sov-1) 26%,var(--sov-2) 42%,var(--sov-2) 60%,var(--sov-3) 76%,var(--sov-3) 100%);
+    outline:none;cursor:pointer;display:block;opacity:.85;
+  }
+  input[type=range]::-webkit-slider-thumb{
+    -webkit-appearance:none;appearance:none;width:20px;height:20px;border-radius:50%;
+    background:var(--ink);border:3px solid var(--bg);
+    box-shadow:0 0 0 1px rgba(138,138,246,.8),0 4px 14px rgba(0,0,0,.5);cursor:pointer;
+    transition:box-shadow .15s ease;
+  }
+  input[type=range]::-webkit-slider-thumb:hover{box-shadow:0 0 0 1px var(--accent),0 0 0 6px var(--accent-soft),0 4px 14px rgba(0,0,0,.5)}
+  input[type=range]::-moz-range-thumb{
+    width:20px;height:20px;border-radius:50%;background:var(--ink);border:3px solid var(--bg);
+    box-shadow:0 0 0 1px rgba(138,138,246,.8);cursor:pointer;
+  }
+  input[type=range]:focus-visible{outline:2px solid var(--accent);outline-offset:8px;border-radius:5px}
+  .sov-ticks{display:flex;justify-content:space-between;margin-top:16px}
+  .sov-tick{
+    font-family:'JetBrains Mono',monospace;font-size:10px;letter-spacing:.05em;color:var(--ink-faint);
+    text-align:center;flex:1;transition:color .15s;cursor:pointer;padding:4px 0;border-radius:6px;
+  }
+  .sov-tick:hover{color:var(--ink-dim)}
+  .sov-tick.on{color:var(--ink)}
+  .sov-tick span{display:block;font-size:8.5px;color:var(--ink-faint);margin-top:3px}
+
+  /* ---------- output ---------- */
+  .out-head{display:flex;align-items:center;gap:12px;margin-bottom:16px}
+  .out-head .line{flex:1;height:1px;background:var(--line-soft)}
+  .out-head .lbl{font-family:'JetBrains Mono',monospace;font-size:10.5px;letter-spacing:.16em;text-transform:uppercase;color:var(--ink-faint)}
+  .out-head .stance{
+    font-family:'JetBrains Mono',monospace;font-size:9px;letter-spacing:.07em;text-transform:uppercase;
+    padding:3px 9px;border-radius:5px;border:1px solid var(--line);background:var(--panel-3);
+  }
+
+  .grid{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:12px}
+  .card{
+    background:linear-gradient(180deg,var(--panel),var(--panel-2));
+    border:1px solid var(--line);border-radius:var(--r);padding:22px 24px;
+    animation:rise .35s cubic-bezier(.2,.7,.3,1) both;box-shadow:var(--hl);
+  }
+  .card.full{grid-column:1 / -1}
+  @keyframes rise{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:none}}
+  .card h4{
+    font-family:'JetBrains Mono',monospace;font-size:10px;letter-spacing:.16em;
+    text-transform:uppercase;color:var(--accent);margin-bottom:14px;font-weight:600;
+  }
+
+  .applies{list-style:none}
+  .applies li{font-size:13.5px;color:var(--ink-dim);padding:10px 0 10px 20px;position:relative;border-bottom:1px solid var(--line-soft)}
+  .applies li:last-child{border-bottom:none;padding-bottom:2px}
+  .applies li::before{content:"";position:absolute;left:0;top:17px;width:6px;height:6px;border-radius:2px;background:var(--accent);opacity:.85}
+  .applies li b{color:var(--ink);font-weight:600}
+
+  .mech{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:20px}
+  .chip{
+    font-family:'JetBrains Mono',monospace;font-size:10.5px;border:1px solid var(--line);
+    border-radius:6px;padding:5px 10px;color:var(--ink-dim);background:var(--panel-3);
+    transition:border-color .15s,color .15s;
+  }
+  .chip:hover{border-color:var(--line-hover);color:var(--ink)}
+  .gain{display:inline-flex;align-items:baseline;gap:10px;flex-wrap:wrap}
+  .gain .num{font-size:30px;font-weight:700;color:#f4f4f6;letter-spacing:-.03em}
+  .gain .unit{font-size:12.5px;color:var(--ink-dim);max-width:300px}
+  .gain-note{font-size:11px;color:var(--ink-faint);margin-top:10px}
+
+  .cite{
+    font-family:'JetBrains Mono',monospace;font-size:9px;letter-spacing:.03em;
+    color:var(--accent);text-decoration:none;border:1px solid var(--line);
+    border-radius:5px;padding:1.5px 7px;margin-left:6px;white-space:nowrap;
+    vertical-align:2px;background:var(--panel-3);
+    transition:border-color .15s,background .15s;
+  }
+  .cite:hover{border-color:rgba(138,138,246,.55);background:var(--accent-soft)}
+
+  .sov-rec{border-left:2px solid var(--rec,var(--accent));transition:border-color .3s ease}
+  .sov-rec .rec-dot,.sov-rec .map-arrow{transition:background .3s ease,color .3s ease}
+  .rec-tier{display:flex;align-items:center;gap:10px;margin-bottom:6px}
+  .rec-dot{width:8px;height:8px;border-radius:50%;background:var(--rec,var(--accent));box-shadow:0 0 12px var(--rec,var(--accent))}
+  .rec-name{font-weight:600;font-size:15.5px;letter-spacing:-.015em;color:#e8e8ee}
+  .rec-context{font-size:13px;color:var(--ink-dim);margin-bottom:14px}
+  .rec-archetype{font-family:'JetBrains Mono',monospace;font-size:12.5px;color:var(--ink);margin:12px 0 6px;font-weight:500}
+  .rec-why{font-size:13px;color:var(--ink-dim)}
+  .mapping{display:grid;grid-template-columns:1fr auto 1fr;gap:12px;align-items:center;margin-top:18px;padding-top:18px;border-top:1px solid var(--line-soft)}
+  .map-col .map-lbl{font-family:'JetBrains Mono',monospace;font-size:9px;letter-spacing:.1em;text-transform:uppercase;color:var(--ink-faint);margin-bottom:6px}
+  .map-col .map-val{font-size:12.5px;color:var(--ink-dim)}
+  .map-arrow{color:var(--rec,var(--accent));font-size:17px}
+  .map-col.sov .map-val{color:var(--ink)}
+
+  /* ---------- accordions ---------- */
+  .deep{margin-top:10px;border:1px solid var(--line);border-radius:var(--r);overflow:hidden;background:var(--panel-3);box-shadow:var(--hl)}
+  .acc{border-bottom:1px solid var(--line-soft)}
+  .acc:last-child{border-bottom:none}
+  .acc summary{
+    cursor:pointer;list-style:none;padding:15px 20px;display:flex;align-items:center;gap:12px;
+    font-weight:600;font-size:13.5px;color:#e4e4ea;user-select:none;letter-spacing:-.01em;
+    transition:background .12s;
+  }
+  .acc summary:hover{background:var(--panel-2)}
+  .acc summary:focus-visible{outline:2px solid var(--accent);outline-offset:-2px}
+  .acc summary::-webkit-details-marker{display:none}
+  .acc .ico{
+    width:18px;height:18px;border:1px solid var(--line);border-radius:5px;
+    display:flex;align-items:center;justify-content:center;color:var(--accent);
+    font-size:12px;flex-shrink:0;transition:transform .18s ease,border-color .18s;
+    font-family:'JetBrains Mono',monospace;background:var(--panel-2);
+  }
+  .acc[open] .ico{transform:rotate(45deg);border-color:rgba(138,138,246,.5)}
+  .acc .num{font-family:'JetBrains Mono',monospace;font-size:10px;color:var(--ink-faint);margin-left:auto}
+  .acc-body{padding:2px 20px 18px 50px;font-size:13px;color:var(--ink-dim);animation:rise .25s ease both}
+  .acc-body p{margin-bottom:10px}
+  .acc-body p:last-child{margin-bottom:0}
+  .acc-body b{color:var(--ink);font-weight:600}
+
+  /* ---------- sources ---------- */
+  .sources{
+    margin-top:36px;background:linear-gradient(180deg,var(--panel-2),var(--panel-3));
+    border:1px solid var(--line);border-radius:14px;padding:24px 28px;box-shadow:var(--hl);
+  }
+  .sources h4{font-family:'JetBrains Mono',monospace;font-size:10px;letter-spacing:.16em;text-transform:uppercase;color:var(--accent);margin-bottom:16px;font-weight:600}
+  .src-list{list-style:none;display:grid;grid-template-columns:1fr 1fr;gap:6px 26px}
+  .src-list li{font-size:12px;color:var(--ink-dim);padding:8px 0;border-bottom:1px solid var(--line-soft);display:flex;gap:10px;align-items:baseline}
+  .src-list .n{font-family:'JetBrains Mono',monospace;font-size:9.5px;color:var(--accent);flex-shrink:0}
+  .src-list a{color:var(--ink-dim);text-decoration:none;border-bottom:1px dotted var(--ink-faint);transition:color .15s,border-color .15s}
+  .src-list a:hover{color:var(--accent);border-color:var(--accent)}
+  .src-list .org{color:var(--ink);font-weight:600}
+
+  /* ---------- footer ---------- */
+  footer{border-top:1px solid var(--line-soft);margin-top:36px;padding:28px 0 52px;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:14px}
+  footer .note{font-size:12px;color:var(--ink-faint);max-width:600px}
+  footer .sig{font-family:'JetBrains Mono',monospace;font-size:11.5px;color:var(--ink-dim);letter-spacing:.03em}
+  footer .sig b{color:var(--accent)}
+
+
+  /* ===== rating dashboard ===== */
+  .rt-top{display:grid;grid-template-columns:auto 1fr;gap:18px;margin-bottom:16px}
+  .rt-gauge{background:var(--panel-3);border:1px solid var(--line);border-radius:10px;padding:16px 22px;text-align:center;min-width:140px}
+  .rt-grade{font-size:38px;font-weight:800;color:var(--sov-1);line-height:1;letter-spacing:-.02em}
+  .rt-score{font-size:18px;font-weight:700;color:#f4f4f6;margin-top:6px}
+  .rt-score span{font-size:11px;color:var(--ink-faint);font-weight:400}
+  .rt-trend{font-family:'JetBrains Mono',monospace;font-size:10px;margin-top:6px}
+  .rt-vectors{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+  .rt-vec{display:flex;align-items:center;justify-content:space-between;background:var(--panel-3);border:1px solid var(--line);border-radius:8px;padding:9px 12px}
+  .rv-name{font-size:12px;color:var(--ink-dim)}
+  .rv-grade{font-family:'JetBrains Mono',monospace;font-weight:600;font-size:13px;border:1px solid currentColor;border-radius:5px;width:24px;height:22px;display:flex;align-items:center;justify-content:center}
+  .rt-dist{display:flex;align-items:flex-end;gap:8px;height:70px;padding:10px 4px 0;margin-bottom:14px;border-bottom:1px solid var(--line-soft)}
+  .rt-bar{flex:1;display:flex;flex-direction:column;align-items:center;height:100%;justify-content:flex-end;gap:6px}
+  .rb-fill{width:100%;max-width:42px;background:linear-gradient(180deg,var(--accent),rgba(138,138,246,.35));border-radius:4px 4px 0 0;min-height:4px}
+  .rb-lbl{font-family:'JetBrains Mono',monospace;font-size:10px;color:var(--ink-faint)}
+
+  /* ===== soc dashboard ===== */
+  .soc-spark{display:flex;align-items:flex-end;gap:3px;height:48px;margin:4px 0 16px;padding:0 2px}
+  .soc-spark span{flex:1;background:linear-gradient(180deg,var(--accent),rgba(138,138,246,.25));border-radius:2px;min-height:3px}
+  .soc-funnel{display:flex;align-items:center;gap:8px;margin-bottom:16px;flex-wrap:wrap}
+  .sf-step{background:var(--panel-3);border:1px solid var(--line);border-radius:9px;padding:10px 14px;text-align:center;flex:1;min-width:90px}
+  .sf-step.sf-end{border-color:rgba(248,126,151,.4)}
+  .sf-n{display:block;font-size:18px;font-weight:700;color:#f4f4f6}
+  .sf-end .sf-n{color:var(--sov-3)}
+  .sf-l{font-size:10px;color:var(--ink-faint);margin-top:2px;display:block}
+  .sf-arrow{color:var(--ink-faint);font-size:14px}
+  .soc-feed .app-row{grid-template-columns:48px 1fr auto}
+  .ar-time{font-family:'JetBrains Mono',monospace;font-size:11px;color:var(--ink-faint)}
+
+  /* ===== surface dashboard ===== */
+  .sev-bar{display:flex;height:14px;border-radius:7px;overflow:hidden;margin:4px 0 12px;border:1px solid var(--line)}
+  .sev-seg.st-ok{background:var(--sov-1)}.sev-seg.st-warn{background:var(--sov-2)}.sev-seg.st-risk{background:var(--sov-3)}.sev-seg.st-mid{background:#c98a5e}
+  .sev-legend{display:flex;flex-wrap:wrap;gap:14px;margin-bottom:16px}
+  .sl-item{font-size:11px;color:var(--ink-dim);font-family:'JetBrains Mono',monospace;display:flex;align-items:center;gap:6px}
+  .sl-dot{width:8px;height:8px;border-radius:2px}
+  .sl-dot.st-ok{background:var(--sov-1)}.sl-dot.st-warn{background:var(--sov-2)}.sl-dot.st-risk{background:var(--sov-3)}.sl-dot.st-mid{background:#c98a5e}
+
+  /* ===== killchain dashboard ===== */
+  .killchain{display:flex;align-items:center;margin:6px 0 18px;flex-wrap:wrap;gap:4px}
+  .kc-node{display:flex;flex-direction:column;align-items:center;gap:7px;flex:1;min-width:64px}
+  .kc-dot{width:14px;height:14px;border-radius:50%;border:2px solid var(--line-hover);background:var(--panel-3)}
+  .kc-node.kc-done .kc-dot{background:var(--sov-1);border-color:var(--sov-1)}
+  .kc-node.kc-active .kc-dot{background:var(--sov-2);border-color:var(--sov-2);box-shadow:0 0 0 4px rgba(223,185,95,.18)}
+  .kc-lbl{font-size:10.5px;color:var(--ink-dim);text-align:center}
+  .kc-node.kc-active .kc-lbl{color:var(--ink);font-weight:600}
+  .kc-line{height:2px;flex:.6;background:var(--line);min-width:14px;margin-bottom:18px}
+  .kc-line-on{background:var(--sov-1)}
+
+  /* ===== gov dashboard ===== */
+  .gov-frameworks{display:flex;flex-direction:column;gap:9px;margin-bottom:16px}
+  .gf-row{display:grid;grid-template-columns:130px 1fr 40px;gap:12px;align-items:center}
+  .gf-name{font-size:12.5px;color:var(--ink-dim)}
+  .gf-track{height:8px;background:var(--panel-3);border:1px solid var(--line);border-radius:5px;overflow:hidden}
+  .gf-fill{display:block;height:100%}
+  .gf-fill.st-ok{background:var(--sov-1)}.gf-fill.st-warn{background:var(--sov-2)}.gf-fill.st-risk{background:var(--sov-3)}
+  .gf-pct{font-family:'JetBrains Mono',monospace;font-size:11px;color:var(--ink-dim);text-align:right}
+  .gov-heat{display:flex;flex-direction:column;gap:4px;margin-bottom:16px;padding:12px;background:var(--panel-3);border:1px solid var(--line);border-radius:9px}
+  .gh-row{display:flex;gap:4px}
+  .gh-cell{flex:1;height:14px;border-radius:3px}
+  .hm-1{background:rgba(95,212,180,.35)}.hm-2{background:rgba(223,185,95,.45)}.hm-3{background:rgba(248,126,151,.5)}
+
+  /* transparency note on top5 */
+  .t5-flagnote{font-family:'JetBrains Mono',monospace;font-size:8.5px;letter-spacing:.04em;color:var(--accent);border:1px solid rgba(138,138,246,.35);border-radius:4px;padding:1.5px 6px;margin-left:9px;vertical-align:2px;font-weight:400;background:var(--accent-soft)}
+
+  @media(max-width:780px){
+    .rt-top{grid-template-columns:1fr}
+    .gf-row{grid-template-columns:90px 1fr 36px}
+    .soc-feed .app-row{grid-template-columns:42px 1fr auto}
+  }
+
+  /* ---------- app preview ---------- */
+  .app-frame{margin-top:18px;border:1px solid var(--line);border-radius:12px;overflow:hidden;background:linear-gradient(180deg,var(--panel),var(--panel-2));box-shadow:0 12px 40px rgba(0,0,0,.35),var(--hl);animation:rise .4s ease both}
+  .app-bar{display:flex;align-items:center;gap:12px;padding:11px 16px;border-bottom:1px solid var(--line-soft);background:var(--panel-3)}
+  .app-dots{display:flex;gap:6px}
+  .app-dots i{width:9px;height:9px;border-radius:50%;display:block}
+  .app-dots i:first-child{background:#e0716a}.app-dots i:nth-child(2){background:#dfb95f}.app-dots i:nth-child(3){background:#5fd4b4}
+  .app-name{font-family:'JetBrains Mono',monospace;font-size:11px;color:var(--ink-dim);letter-spacing:.02em}
+  .app-live{margin-left:auto;font-family:'JetBrains Mono',monospace;font-size:9.5px;color:var(--sov-1);letter-spacing:.08em}
+  .app-body{padding:18px 18px 18px}
+  .st-ok{color:var(--sov-1)}.st-warn{color:var(--sov-2)}.st-risk{color:var(--sov-3)}
+
+  .dash-grid{display:grid;grid-template-columns:auto 1fr;gap:18px;margin-bottom:14px;align-items:start}
+  .dash-grid:has(.feed),.dash-grid:has(.heat){grid-template-columns:1fr 1fr}
+  .dash-col{display:flex;flex-direction:column;gap:12px;min-width:0}
+  .blk-lbl{font-family:'JetBrains Mono',monospace;font-size:9.5px;letter-spacing:.12em;text-transform:uppercase;color:var(--ink-faint)}
+
+  .app-kpis{display:grid;gap:10px}
+  .app-kpis.k2{grid-template-columns:1fr 1fr}
+  .kpi{background:var(--panel-3);border:1px solid var(--line);border-radius:9px;padding:11px 13px}
+  .kpi-n{font-size:21px;font-weight:700;color:#f4f4f6;letter-spacing:-.02em;line-height:1}
+  .kpi-l{font-size:10px;color:var(--ink-faint);margin-top:5px}
+
+  /* score ring (rating + grc) */
+  .ring-box{display:flex;flex-direction:column;align-items:center;gap:8px;padding:4px 6px}
+  .ring{width:118px;height:118px;border-radius:50%;background:conic-gradient(var(--accent) calc(var(--p)*1%),var(--line-soft) 0);display:flex;align-items:center;justify-content:center}
+  .ring.g{background:conic-gradient(var(--sov-1) calc(var(--p)*1%),var(--line-soft) 0)}
+  .ring-in{width:92px;height:92px;border-radius:50%;background:var(--panel-2);display:flex;flex-direction:column;align-items:center;justify-content:center;border:1px solid var(--line)}
+  .ring-grade{font-size:26px;font-weight:700;color:#f4f4f6;letter-spacing:-.02em;line-height:1}
+  .ring-num{font-family:'JetBrains Mono',monospace;font-size:9.5px;color:var(--ink-faint);margin-top:4px;text-align:center;padding:0 8px}
+  .ring-trend{font-family:'JetBrains Mono',monospace;font-size:10px;color:var(--sov-1)}
+
+  /* suppliers (rating) */
+  .sup-rows{display:flex;flex-direction:column;gap:1px;background:var(--line-soft);border:1px solid var(--line);border-radius:9px;overflow:hidden}
+  .sup-row{display:grid;grid-template-columns:34px 1fr auto;gap:12px;align-items:center;padding:9px 12px;background:var(--panel-2);font-size:12.5px}
+  .grade{font-family:'JetBrains Mono',monospace;font-weight:600;font-size:13px;border:1px solid currentColor;border-radius:6px;width:26px;height:26px;display:flex;align-items:center;justify-content:center}
+  .sup-name{color:var(--ink);font-weight:500}
+  .sup-note{font-size:10.5px;color:var(--ink-faint);font-family:'JetBrains Mono',monospace}
+  .docbar{border:1px solid var(--line);border-radius:9px;padding:12px 14px;background:var(--panel-3);margin-bottom:14px}
+  .docbar-head{display:flex;justify-content:space-between;font-family:'JetBrains Mono',monospace;font-size:10px;letter-spacing:.1em;text-transform:uppercase;color:var(--ink-dim);margin-bottom:8px}
+  .docbar-track{height:6px;border-radius:6px;background:var(--line-soft);overflow:hidden}
+  .docbar-track i{display:block;height:100%;background:linear-gradient(90deg,var(--accent),#b3b3fa);border-radius:6px}
+  .docbar-lbl{font-size:11px;color:var(--ink-faint);margin-top:8px}
+
+  /* SOC */
+  .sevchart{display:flex;gap:10px;align-items:flex-end;height:96px;border:1px solid var(--line);border-radius:9px;background:var(--panel-3);padding:12px 14px 8px}
+  .sev{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:flex-end;height:100%;gap:4px}
+  .sev i{width:100%;max-width:26px;border-radius:4px 4px 0 0;background:currentColor;display:block;min-height:4px}
+  .sev-n{font-family:'JetBrains Mono',monospace;font-size:9.5px;color:var(--ink-dim)}
+  .sev-l{font-family:'JetBrains Mono',monospace;font-size:9px;color:var(--ink-faint)}
+  .feed{display:flex;flex-direction:column;gap:1px;background:var(--line-soft);border:1px solid var(--line);border-radius:9px;overflow:hidden}
+  .feed-row{display:grid;grid-template-columns:auto 1fr auto;gap:10px;align-items:center;padding:9px 12px;background:var(--panel-2)}
+  .f-time{font-family:'JetBrains Mono',monospace;font-size:10px;color:var(--ink-faint)}
+  .f-title{font-size:12px;color:var(--ink);font-weight:500;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .f-verdict{font-family:'JetBrains Mono',monospace;font-size:8.5px;letter-spacing:.04em;border:1px solid currentColor;border-radius:5px;padding:2px 7px;white-space:nowrap}
+
+  /* EASM */
+  .heat{display:grid;grid-template-columns:repeat(4,1fr);gap:7px}
+  .tile{aspect-ratio:1.6;border:1px solid currentColor;border-radius:7px;display:flex;align-items:center;justify-content:center;font-family:'JetBrains Mono',monospace;font-size:10px;letter-spacing:.06em;background:color-mix(in srgb,currentColor 9%,transparent)}
+  .heat-legend{display:flex;gap:14px;font-family:'JetBrains Mono',monospace;font-size:9px;color:var(--ink-faint)}
+  .expo{display:flex;flex-direction:column;gap:1px;background:var(--line-soft);border:1px solid var(--line);border-radius:9px;overflow:hidden}
+  .expo-row{display:grid;grid-template-columns:1fr auto;gap:10px;align-items:center;padding:9px 12px;background:var(--panel-2)}
+  .expo-name{font-size:11.5px;color:var(--ink)}
+  .expo-score{font-family:'JetBrains Mono',monospace;font-size:11px;font-weight:600;border:1px solid currentColor;border-radius:5px;padding:2px 7px}
+
+  /* OFFSEC */
+  .pipe{display:flex;gap:0;margin-bottom:16px;padding:6px 2px 2px}
+  .pipe-step{flex:1;display:flex;flex-direction:column;align-items:center;gap:7px;position:relative}
+  .pipe-link{position:absolute;top:7px;left:50%;width:100%;height:2px;background:var(--line)}
+  .pipe-step.done .pipe-link{background:var(--accent);opacity:.55}
+  .pipe-dot{width:15px;height:15px;border-radius:50%;border:2px solid var(--line);background:var(--panel-2);position:relative;z-index:1}
+  .pipe-step.done .pipe-dot{background:var(--accent);border-color:var(--accent)}
+  .pipe-step.active .pipe-dot{border-color:var(--accent);box-shadow:0 0 0 4px var(--accent-soft)}
+  .pipe-lbl{font-family:'JetBrains Mono',monospace;font-size:9px;color:var(--ink-faint);text-align:center}
+  .pipe-step.done .pipe-lbl,.pipe-step.active .pipe-lbl{color:var(--ink-dim)}
+  .term{background:#08080b;border:1px solid var(--line);border-radius:9px;padding:13px 15px;font-family:'JetBrains Mono',monospace;font-size:11px;line-height:1.9;color:var(--ink-dim)}
+  .term-line{white-space:normal}
+  .term-p{color:var(--accent);margin-right:8px}
+  .app-kpis.kv{grid-template-columns:1fr}
+
+  /* GRC */
+  .fw{display:flex;flex-direction:column;gap:9px;border:1px solid var(--line);border-radius:9px;background:var(--panel-3);padding:13px 14px}
+  .fw-row{display:grid;grid-template-columns:96px 1fr 38px;gap:11px;align-items:center}
+  .fw-name{font-size:11px;color:var(--ink);font-weight:500}
+  .fw-track{height:6px;border-radius:6px;background:var(--line-soft);overflow:hidden}
+  .fw-track i{display:block;height:100%;background:currentColor;border-radius:6px}
+  .fw-pct{font-family:'JetBrains Mono',monospace;font-size:10px;color:var(--ink-dim);text-align:right}
+
+  .app-agent{display:flex;gap:10px;align-items:flex-start;font-size:12.5px;color:var(--ink-dim);background:var(--accent-soft);border:1px solid rgba(138,138,246,.25);border-radius:9px;padding:12px 14px;line-height:1.5}
+  .ag-badge{font-family:'JetBrains Mono',monospace;font-size:8.5px;letter-spacing:.1em;color:var(--accent);border:1px solid rgba(138,138,246,.4);border-radius:5px;padding:3px 7px;flex-shrink:0;margin-top:1px}
+
+  /* ---------- top 5 ---------- */
+  .top5{margin-top:18px;border:1px solid var(--line);border-radius:12px;background:linear-gradient(180deg,var(--panel),var(--panel-2));padding:20px 22px 12px;box-shadow:var(--hl);animation:rise .45s ease both}
+  .top5-head{display:flex;align-items:baseline;justify-content:space-between;flex-wrap:wrap;gap:8px;margin-bottom:14px}
+  .top5-head h4{font-family:'JetBrains Mono',monospace;font-size:10.5px;letter-spacing:.14em;text-transform:uppercase;color:var(--accent);font-weight:600}
+  .top5-note{font-size:10.5px;color:var(--ink-faint);font-style:italic}
+  .top5-list{list-style:none;counter-reset:none}
+  .top5-item{display:grid;grid-template-columns:30px 1fr auto;gap:14px;align-items:center;padding:13px 0;border-bottom:1px solid var(--line-soft)}
+  .top5-item:last-child{border-bottom:none}
+  .t5-rank{font-family:'JetBrains Mono',monospace;font-size:14px;font-weight:600;color:var(--ink-faint);text-align:center}
+  .top5-item.lead .t5-rank{color:var(--accent);font-size:18px}
+  .t5-main{display:flex;flex-direction:column;gap:3px;min-width:0}
+  .t5-name{font-weight:600;font-size:14px;color:#ececed;letter-spacing:-.01em}
+  .top5-item.lead .t5-name{color:#f4f4f6}
+  .t5-desc{font-size:12px;color:var(--ink-dim);line-height:1.45}
+  .t5-flag{font-family:'JetBrains Mono',monospace;font-size:9px;letter-spacing:.06em;color:var(--ink-faint);border:1px solid var(--line);border-radius:5px;padding:3px 7px;background:var(--panel-3);align-self:start}
+  .top5-item.lead{position:relative}
+  .top5-item.lead::before{content:"";position:absolute;left:-22px;top:0;bottom:0;width:2px;background:var(--accent);opacity:.5}
+
+  @media(max-width:780px){
+    .dash-grid,.dash-grid:has(.feed),.dash-grid:has(.heat){grid-template-columns:1fr}
+    .ring-box{flex-direction:row;justify-content:flex-start;gap:16px}
+    .heat{grid-template-columns:repeat(3,1fr)}
+    .sup-note{display:none}
+    .top5-item{grid-template-columns:24px 1fr;gap:10px}
+    .t5-flag{display:none}
+  }
+
+  @media(max-width:780px){
+    .domains{grid-template-columns:repeat(2,1fr)}
+    .grid{grid-template-columns:1fr}
+    .mapping{grid-template-columns:1fr}
+    .map-arrow{transform:rotate(90deg);justify-self:start}
+    .acc-body{padding-left:20px}
+    .src-list{grid-template-columns:1fr}
+  }
+  @media(max-width:440px){.domains{grid-template-columns:1fr}}
+  @media(prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <header>
+    <div class="eyebrow">Outil d'aide à la décision pour RSSI</div>
+    <h1>Boussole IA <span class="x">×</span> Cyber</h1>
+    <p class="sub">Choisissez un domaine de sécurité et votre niveau de souveraineté. La boussole cartographie où l'IA s'applique réellement, comment elle se déploie, et quelle option souveraine répond à la contrainte — offensif comme défensif. Chaque affirmation est sourcée.</p>
+    <div class="byline">Une perspective indépendante de <b>Célien Leroy</b> — Account Executive, Cybersécurité</div>
+  </header>
+
+  <section class="controls">
+    <div class="ctl-label"><span class="step">01</span> Choisissez un domaine de sécurité</div>
+    <div class="domains" id="domains"></div>
+
+    <div class="ctl-label"><span class="step">02</span> Réglez votre contrainte de souveraineté</div>
+    <div class="sov-block">
+      <div class="sov-head">
+        <h3>Niveau de souveraineté des données</h3>
+        <div class="sov-state" id="sovState">—</div>
+      </div>
+      <div class="slider-wrap">
+        <input type="range" id="sov" min="0" max="100" step="1" value="50" aria-label="Contrainte de souveraineté" aria-valuetext="Réglementé">
+        <span class="zone-mark z1"></span><span class="zone-mark z2"></span>
+      </div>
+      <div class="sov-ticks" id="sovTicks">
+        <div class="sov-tick" data-i="0">Standard<span>cloud public OK</span></div>
+        <div class="sov-tick on" data-i="1">Réglementé<span>UE · NIS2 · DORA</span></div>
+        <div class="sov-tick" data-i="2">Critique<span>OIV · SecNumCloud</span></div>
+      </div>
+    </div>
+  </section>
+
+  <section class="output" id="output" aria-live="polite"></section>
+
+  <section class="sources">
+    <h4>Sources</h4>
+    <ul class="src-list" id="srcList"></ul>
+  </section>
+
+  <footer>
+    <p class="note">Neutralité par conception : les noms cités illustrent des catégories et des faits publics sourcés, pas des recommandations commerciales. Le bon outil dépend de votre périmètre réglementaire, de la classification de vos données et de votre architecture.</p>
+    <div class="sig">conçu par <b>Célien Leroy</b></div>
+  </footer>
+
+</div>
+
+<script>
+const SRC = {
+  dbir:   {n:1, org:'Verizon', label:'Data Breach Investigations Report 2025', url:'https://www.verizon.com/business/resources/reports/dbir/'},
+  ibm:    {n:2, org:'IBM', label:'Cost of a Data Breach Report 2025', url:'https://www.ibm.com/reports/data-breach'},
+  pz:     {n:3, org:'Google Project Zero', label:'« From Naptime to Big Sleep » (nov. 2024)', url:'https://projectzero.google/2024/10/from-naptime-to-big-sleep.html'},
+  gblog:  {n:4, org:'Google Security Blog', label:'Big Sleep & CVE-2025-6965 (juill. 2025)', url:'https://blog.google/innovation-and-ai/technology/safety-security/cybersecurity-updates-summer-2025/'},
+  xbow:   {n:5, org:'XBOW / HackerOne', label:'Agent autonome n°1 d\u2019un classement US (2025)', url:'https://xbow.com/'},
+  anssi:  {n:6, org:'ANSSI', label:'Catalogue des prestataires SecNumCloud qualifiés', url:'https://cyber.gouv.fr/produits-services-qualifies'},
+  aiact:  {n:7, org:'Commission européenne', label:'AI Act — calendrier d\u2019application', url:'https://digital-strategy.ec.europa.eu/en/policies/regulatory-framework-ai'},
+  dora:   {n:8, org:'EUR-Lex', label:'Règlement DORA (UE) 2022/2554', url:'https://eur-lex.europa.eu/eli/reg/2022/2554/oj'},
+  cs:     {n:9, org:'CrowdStrike', label:'Charlotte AI — précision de triage annoncée', url:'https://www.crowdstrike.com/platform/charlotte-ai/'}
+};
+const cite = k => `<a class="cite" href="${SRC[k].url}" target="_blank" rel="noopener" title="${SRC[k].org} — ${SRC[k].label}">${SRC[k].org}</a>`;
+
+const DOMAINS = [
+  {
+    id:'tprm', name:'Risque fournisseurs', stance:'def', stanceLabel:'Défensif',
+    applies:[
+      ['Automatisation des questionnaires','Les LLM lisent politiques et preuves fournisseurs, puis rédigent et notent les questionnaires sécurité.'],
+      ['Surveillance continue','Des agents réévaluent un fournisseur dès que son exposition externe ou un signal d\u2019actualité change.'],
+      ['Extraction de preuves','Cartographie automatique de la couverture des contrôles depuis PDF, rapports SOC 2 et synthèses de pentest.']
+    ],
+    mech:['RAG sur preuves','Agents de scoring','Classification de documents','Synthèse'],
+    gain:['×2','la part des compromissions impliquant un tiers a doublé en un an : 15% → 30%'],
+    gainNote:`Source : ${'Verizon DBIR 2025'} ${'' /* chip added in render */}`,
+    gainSrc:'dbir',
+    deep:[
+      {t:'Le problème métier',b:`Le TPRM repose historiquement sur des questionnaires envoyés à chaque fournisseur, relancés à la main, relus ligne à ligne. Pendant ce temps, la menace explose : <b>30% des compromissions impliquent désormais un tiers, deux fois plus qu\u2019un an plus tôt</b> ${cite('dbir')}. L\u2019évaluation périodique ne suit plus le rythme du risque.`},
+      {t:'Ce que fait l\u2019IA, concrètement',b:`Un agent ingère les documents fournisseurs (politiques de sécurité, rapports d\u2019audit, certifications), les confronte au référentiel de contrôles attendu, identifie les écarts et produit un rapport d\u2019évaluation documenté. Le RSSI ne lit plus que les exceptions et les zones de risque — l\u2019effort se déplace de la collecte vers la décision.`},
+      {t:'État de l\u2019art',b:`Les plateformes de notation cyber et de TPRM industrialisent l\u2019extraction de preuves et la simulation de scoring pour passer d\u2019une évaluation statique à une surveillance continue et contextuelle. Le DBIR recommande explicitement de renforcer la responsabilisation des fournisseurs et le partage d\u2019information ${cite('dbir')} — exactement ce que l\u2019automatisation rend tenable à l\u2019échelle d\u2019un portefeuille de centaines de tiers.`}
+    ]
+  },
+  {
+    id:'soc', name:'SOC & Détection', stance:'def', stanceLabel:'Défensif',
+    applies:[
+      ['Triage des alertes','Des agents enrichissent, corrèlent et priorisent les alertes avant même qu\u2019un analyste les regarde.'],
+      ['Copilote d\u2019investigation','Interrogation des logs en langage naturel ; chronologies d\u2019incident rédigées automatiquement.'],
+      ['Écriture de règles','Génération et réglage des règles de détection à partir d\u2019un comportement d\u2019attaquant décrit.']
+    ],
+    mech:['Triage agentique','RAG sur logs','Scoring d\u2019anomalies','Génération de playbooks'],
+    gain:['−1,9 M$','de coût moyen par incident pour les organisations utilisant largement IA & automatisation de sécurité'],
+    gainSrc:'ibm',
+    deep:[
+      {t:'Le problème métier',b:`Le SOC croule sous le volume d\u2019alertes : la majorité sont des faux positifs, mais chacune doit être qualifiée. La fatigue d\u2019alerte fait passer les vraies menaces entre les mailles. L\u2019enjeu n\u2019est pas de remplacer l\u2019analyste, mais de lui retirer le bruit.`},
+      {t:'Ce que fait l\u2019IA, concrètement',b:`Un système multi-agents prend l\u2019alerte de niveau 1, l\u2019enrichit (contexte identité, endpoint, réseau), la corrèle avec d\u2019autres signaux et propose une qualification + une action — sous garde-fous, avec validation humaine pour les décisions à fort impact. Résultat mesuré : les organisations à déploiement IA/automatisation étendu raccourcissent leur cycle de compromission de <b>80 jours</b> et économisent <b>1,9 M$ par incident</b> en moyenne ${cite('ibm')}.`},
+      {t:'État de l\u2019art',b:`Les plateformes EDR/XDR majeures embarquent des agents de triage entraînés sur des décisions d\u2019analystes experts — l\u2019un des leaders du marché annonce une précision de triage supérieure à 98% et plus de 40 heures d\u2019analyste économisées par semaine ${cite('cs')} (chiffres éditeur). La bascule en cours : les agents ne se contentent plus d\u2019investiguer, ils exécutent la containment sous politique, humain dans la boucle.`}
+    ]
+  },
+  {
+    id:'vuln', name:'Vulnérabilités & Surface', stance:'both', stanceLabel:'Offensif + Défensif',
+    applies:[
+      ['Découverte d\u2019exposition','Des agents cartographient en continu les actifs exposés et révèlent le shadow IT (EASM).'],
+      ['Priorisation par le risque','Raisonnement sur l\u2019exploitabilité, l\u2019accessibilité et le contexte métier — pas seulement le score CVSS.'],
+      ['Guidage de remédiation','Étapes de correction et tests de validation rédigés par actif et par responsable.']
+    ],
+    mech:['Agents de reconnaissance','Raisonnement sur exploit','Ranking contextuel','Rédaction de remédiation'],
+    gain:['+34%','d\u2019exploitation de vulnérabilités en un an — 20% des accès initiaux des compromissions'],
+    gainSrc:'dbir',
+    deep:[
+      {t:'Le problème métier',b:`La surface d\u2019attaque externe grossit plus vite qu\u2019on ne la cartographie : cloud, shadow IT, actifs oubliés. Et les attaquants en profitent — l\u2019exploitation de vulnérabilités a bondi de <b>34% en un an</b> et représente <b>20% des accès initiaux</b>, avec un ciblage des équipements de bordure (VPN, edge) multiplié par huit ${cite('dbir')}.`},
+      {t:'Ce que fait l\u2019IA, concrètement',b:`C\u2019est le pont entre gouvernance et opérationnel : l\u2019EASM piloté par IA découvre l\u2019exposition, puis raisonne sur l\u2019exploitabilité réelle (un actif est-il atteignable ? la faille est-elle chaînable ?) pour prioriser. Le RSSI reçoit une liste courte d\u2019actions à fort impact, pas un déluge trié par CVSS.`},
+      {t:'État de l\u2019art',b:`La frontière entre EASM défensif et test offensif s\u2019efface : les mêmes capacités de reconnaissance servent à se cartographier soi-même comme le ferait un attaquant. La preuve par la recherche : l\u2019agent Big Sleep (Google DeepMind × Project Zero) a découvert la première vulnérabilité réelle jamais trouvée par un agent IA dans un logiciel largement utilisé ${cite('pz')}, puis a stoppé l\u2019exploitation imminente d\u2019une faille critique connue des seuls attaquants (CVE-2025-6965) ${cite('gblog')}.`}
+    ]
+  },
+  {
+    id:'offsec', name:'Pentest & Red Team', stance:'off', stanceLabel:'Offensif',
+    applies:[
+      ['Recon & énumération','Les agents automatisent les premières heures lentes d\u2019un engagement.'],
+      ['Chaînage de vulnérabilités','Raisonnement entre découvertes pour construire des chemins d\u2019élévation de privilèges.'],
+      ['Génération de rapports','Transformation des découvertes brutes en rapports clients avec étapes de reproduction.']
+    ],
+    mech:['Recon autonome','Agents multi-étapes','Orchestration d\u2019outils','Synthèse de rapport'],
+    gain:['n°1','un agent IA autonome a atteint le sommet d\u2019un classement bug bounty américain en 2025'],
+    gainSrc:'xbow',
+    deep:[
+      {t:'Le problème métier',b:`Le pentest reste périodique et manuel, déconnecté du rythme de production. Entre deux audits, le code change, la surface évolue, et l\u2019écart se creuse entre ce qui a été testé et ce qui est réellement exploitable aujourd\u2019hui.`},
+      {t:'Ce que fait l\u2019IA, concrètement',b:`Un système multi-agents distribue les rôles — reconnaissance, exploitation, reporting — pour mener des séquences d\u2019attaque complexes. Les agents valident leurs trouvailles en exécutant des preuves de concept inoffensives sous couche de sécurité, éliminant les faux positifs et produisant des rapports reproductibles.`},
+      {t:'État de l\u2019art',b:`Deux jalons publics : un agent de pentest autonome a atteint la <b>première place d\u2019un classement HackerOne américain</b> en soumettant des vulnérabilités valides et rémunérées à vitesse machine ${cite('xbow')} ; et l\u2019agent Big Sleep a démontré qu\u2019un LLM peut découvrir une faille mémoire inédite dans un logiciel critique en raisonnant sur le code ${cite('pz')}. Le pentest bascule du périodique au continu, intégré aux pipelines de développement.`}
+    ]
+  },
+  {
+    id:'gov', name:'Gouvernance & Conformité', stance:'def', stanceLabel:'Défensif',
+    applies:[
+      ['Mapping de référentiels','Mise en correspondance des contrôles entre ISO 27001, NIS2, DORA et votre politique interne, d\u2019un coup.'],
+      ['Analyse d\u2019écart','Comparaison de la posture actuelle à un référentiel cible et rédaction du plan de remédiation.'],
+      ['Rédaction de politiques','Génération et cohérence des politiques au fil de l\u2019évolution réglementaire.']
+    ],
+    mech:['RAG réglementaire','Mapping de contrôles','Raisonnement sur écarts','Génération de politiques'],
+    gain:['Août 2026','pleine application de l\u2019AI Act européen — traçabilité et auditabilité exigées'],
+    gainSrc:'aiact',
+    deep:[
+      {t:'Le problème métier',b:`Un RSSI jongle entre des référentiels qui se recoupent partiellement — ISO 27001, NIS2, DORA (applicable depuis le 17 janvier 2025 ${cite('dora')}), exigences ANSSI, politiques internes. Cartographier les contrôles d\u2019un référentiel à l\u2019autre est un travail d\u2019expert, long, refait à chaque nouvelle exigence.`},
+      {t:'Ce que fait l\u2019IA, concrètement',b:`Un moteur RAG indexe les corpus réglementaires et vos contrôles internes, puis raisonne sur les recouvrements : un même contrôle satisfait souvent plusieurs exigences. L\u2019IA produit la matrice de correspondance, identifie les écarts réels et rédige le plan d\u2019action — relu et validé par l\u2019humain.`},
+      {t:'État de l\u2019art',b:`Le calendrier réglementaire rend le sujet urgent : l\u2019AI Act atteint sa pleine application en <b>août 2026</b> ${cite('aiact')}, avec des exigences de traçabilité et d\u2019auditabilité que les systèmes IA non gouvernés ne sauront pas démontrer. Ironie utile : la conformité IA est elle-même l\u2019un des meilleurs cas d\u2019usage de l\u2019IA.`}
+    ]
+  }
+];
+
+const SOV = [
+  {
+    key:'Standard', color:'var(--sov-1)', tier:'Standard',
+    context:'Données peu sensibles : la priorité est la vitesse de mise en valeur, pas l\u2019isolement.',
+    archetype:'Service IA managé / brique IA intégrée à un SaaS de sécurité',
+    why:'Un modèle hébergé ou des fonctions IA déjà embarquées dans vos outils donnent le chemin le plus court vers la valeur, sans infrastructure à exploiter.',
+    us:'API LLM cloud, copilotes intégrés aux plateformes de sécurité',
+    sovereign:'Assistants & API IA européens en endpoint, briques IA d\u2019éditeurs européens',
+    srcKeys:[]
+  },
+  {
+    key:'Réglementé', color:'var(--sov-2)', tier:'Réglementé — UE · NIS2 · DORA',
+    context:'Données régulées : modèle puissant accepté, à condition que le traitement reste en région et sous garanties contractuelles.',
+    archetype:'Modèle hébergé en UE ou cloud privé, résidence des données garantie',
+    why:'On peut utiliser des modèles performants en mode hébergé tant que le traitement reste dans le périmètre UE, avec garanties de résidence et de non-entraînement. DORA impose depuis janvier 2025 la maîtrise du risque TIC, y compris chez les prestataires.',
+    us:'Endpoints région-UE des grands clouds (non-training, données localisées)',
+    sovereign:'GPU et endpoints IA hébergés en France/UE par des acteurs européens (ISO 27001), clouds français',
+    srcKeys:['dora']
+  },
+  {
+    key:'Critique', color:'var(--sov-3)', tier:'Critique — OIV · SecNumCloud',
+    context:'Données critiques / classifiées : aucune donnée ne sort, immunité aux lois extraterritoriales (CLOUD Act, FISA) exigée — c\u2019est précisément ce que garantit le référentiel SecNumCloud 3.2 de l\u2019ANSSI.',
+    archetype:'Modèle open-weight déployé on-premise / air-gapped, 100% auto-hébergé',
+    why:'Pour les opérateurs critiques et les données classifiées, le seul modèle acceptable est celui que vous exécutez vous-même — open-weight, sur votre infrastructure ou sur un cloud qualifié, sans appel externe. C\u2019est là que les modèles ouverts souverains prennent tout leur sens.',
+    us:'(non applicable — un cloud soumis au CLOUD Act est exclu par construction)',
+    sovereign:'Modèles open-weight self-hosted · clouds qualifiés SecNumCloud par l\u2019ANSSI (OVHcloud, Outscale, Scaleway, NumSpot, Cloud Temple…) · inférence air-gapped',
+    srcKeys:['anssi']
+  }
+];
+
+const TOP5 = {"tprm": [["Board of Cyber", "Nouvelle plateforme native IA : analyse documentaire par IA mutualisée, évaluation des tiers 100% automatisée et autonome de bout en bout — hébergée en France.", "FR", "transparence : j’y travaille"], ["Galink", "Plateforme AI-native + agent Seel : audit fournisseur autonome, données hébergées en France.", "FR"], ["CyberVadis", "Évaluation standardisée de la chaîne fournisseurs à l’échelle, réseau mutualisé.", "FR"], ["Aprovall", "TPRM côté direction Achats, déclenchement d’évaluations cyber sur les tiers critiques.", "FR"], ["Citalid", "Quantification du risque cyber (dont tiers) pilotée par la threat intelligence.", "FR"]], "soc": [["Sekoia.io", "Plateforme SOC/XDR souveraine pilotée par IA, CTI native, données en France.", "FR"], ["Qevlar AI", "Agents IA d’investigation SOC autonomes, ~100% de fiabilité revendiquée, clients CAC 40.", "FR"], ["HarfangLab", "EDR qualifié ANSSI, déployable SecNumCloud/on-prem/air-gapped, IA anti-alert-fatigue.", "FR"], ["Gatewatcher", "Détection réseau (NDR) augmentée par IA pour environnements sensibles.", "FR"], ["Mindflow", "Hyperautomatisation SOAR no-code pour orchestrer la réponse aux incidents.", "FR"]], "vuln": [["Patrowl", "SaaS 100% français d’EASM + orchestration de la remédiation, surveillance continue.", "FR"], ["CybelAngel", "Détection d’exposition et de fuites (web visible, dark web, serveurs ouverts).", "FR"], ["Hackuity", "Priorisation des vulnérabilités basée sur le risque réel et l’exploitabilité.", "FR"], ["Gatewatcher", "Détection des menaces et des expositions sur les environnements critiques.", "FR"], ["Beareye", "Plateforme EASM souveraine orientée secteurs sensibles.", "FR"]], "offsec": [["YesWeHack", "Plateforme de bug bounty européenne n°1, communauté de hackers éthiques mondiale.", "FR"], ["Yogosha", "Bug bounty privé + pentest as a service, élite de hackers sélectionnés.", "FR"], ["Patrowl", "Scan offensif continu et tests automatisés en SaaS souverain.", "FR"], ["Sekost", "Acteur souverain du test et de la détection (Cyber Panorama CESIN).", "FR"], ["TrustInSoft", "Analyse de code à garantie mathématique pour logiciels critiques.", "FR"]], "gov": [["Tenacy", "Plateforme GRC française, hébergée en France, pilotage et automatisation de la conformité.", "FR"], ["Egerie", "Analyse et quantification du risque, référence GRC souveraine pour grands comptes.", "FR"], ["Citalid", "Quantification financière du risque cyber pilotée par la threat intelligence.", "FR"], ["Board of Cyber", "Mesure de la performance cyber et reporting pour piloter la posture.", "FR"], ["Wallix", "Gouvernance des accès à privilèges (PAM), brique clé de la conformité.", "FR"]]};
+const EXT = {"tprm": {"appTitle": "Notation fournisseurs — portefeuille", "type": "rating", "score": {"grade": "B+", "num": 82, "trend": "+6 pts / 90 jours"}, "kpis": [["142", "fournisseurs suivis"], ["8", "écarts critiques ouverts"]], "suppliers": [["Acme Cloud SaaS", "E", "risk", "3 non-conformités ISO"], ["Logipro ERP", "C", "warn", "preuves partielles"], ["DataNova Hébergeur", "B", "ok", "SOC 2 vérifié"], ["Northwind Logistics", "A", "ok", "conforme — 0 écart"]], "doc": {"pct": 91, "label": "1 240 pages de preuves analysées par IA mutualisée — 100% automatisé"}, "agent": "L’agent a audité Acme Cloud de bout en bout : lecture des preuves, détection de 3 non-conformités ISO 27001, plan de remédiation proposé au fournisseur.", "top5": [["Board of Cyber", "Plateforme DoC native IA : analyse documentaire par IA mutualisée, évaluation 100% automatisée et autonome de bout en bout — hébergée en France.", "FR"], ["Galink", "Plateforme AI-native + agent Seel : audit fournisseur autonome, données hébergées en France.", "FR"], ["CyberVadis", "Évaluation standardisée de la chaîne fournisseurs à l’échelle, réseau mutualisé.", "FR"], ["Aprovall", "TPRM côté direction Achats, déclenchement d’évaluations cyber sur les tiers critiques.", "FR"], ["Citalid", "Quantification du risque cyber (dont tiers) pilotée par la threat intelligence.", "FR"]]}, "soc": {"appTitle": "Console SOC — file de triage", "type": "soc", "kpis": [["96%", "alertes triées par l’IA"], ["4 min", "temps moyen de qualification"]], "sev": [["P1", 3, "risk"], ["P2", 14, "warn"], ["P3", 38, "warn"], ["P4", 61, "ok"], ["P5", 24, "ok"]], "feed": [["14:02", "Exfiltration suspecte — tunnel DNS", "VRAI POSITIF · P1", "risk"], ["14:01", "PowerShell encodé sur SRV-FIN-02", "À INVESTIGUER · P2", "warn"], ["13:58", "Brute-force RDP — bloqué", "BÉNIN · P4", "ok"], ["13:54", "Connexion atypique (déplacement)", "FAUX POSITIF · P5", "ok"]], "agent": "L’agent a corrélé 3 signaux (identité + EDR + proxy), qualifié l’incident P1 en 4 minutes et préparé le playbook de containment — validation analyste requise.", "top5": [["Sekoia.io", "Plateforme SOC/XDR souveraine pilotée par IA, CTI native, données en France.", "FR"], ["Qevlar AI", "Agents IA d’investigation SOC autonomes, fiabilité proche de 100% revendiquée, clients CAC 40.", "FR"], ["HarfangLab", "EDR qualifié ANSSI, déployable SecNumCloud / on-prem / air-gapped, IA anti-alert-fatigue.", "FR"], ["Gatewatcher", "Détection réseau (NDR) augmentée par IA pour environnements sensibles.", "FR"], ["Mindflow", "Hyperautomatisation SOAR no-code pour orchestrer la réponse aux incidents.", "FR"]]}, "vuln": {"appTitle": "Cartographie de surface — exposition", "type": "easm", "kpis": [["317", "actifs exposés découverts"], ["+24", "shadow IT révélé ce mois"]], "tiles": [["VPN", "risk"], ["API", "warn"], ["S3", "risk"], ["WEB", "ok"], ["DNS", "ok"], ["MAIL", "ok"], ["CDN", "ok"], ["GIT", "warn"], ["IOT", "warn"], ["SSO", "ok"], ["FTP", "risk"], ["DEV", "warn"]], "expo": [["vpn.corp.fr — CVE critique exploitable", "9.8", "risk"], ["s3-backup-public — données exposées", "8.4", "risk"], ["api-staging.corp.fr — sans authentification", "7.1", "warn"]], "agent": "L’IA a priorisé le VPN exposé (atteignable + faille chaînable + actif critique) au-dessus de 280 vulnérabilités au CVSS pourtant plus élevé.", "top5": [["Patrowl", "SaaS 100% français d’EASM + orchestration de la remédiation, surveillance continue.", "FR"], ["CybelAngel", "Détection d’exposition et de fuites (web visible, dark web, serveurs ouverts).", "FR"], ["Hackuity", "Priorisation des vulnérabilités basée sur le risque réel et l’exploitabilité.", "FR"], ["Gatewatcher", "Détection des menaces et des expositions sur les environnements critiques.", "FR"], ["Beareye", "Plateforme EASM souveraine orientée secteurs sensibles.", "FR"]]}, "offsec": {"appTitle": "Agent offensif — engagement en cours", "type": "offsec", "kpis": [["7", "vulnérabilités chaînées"], ["1", "chemin admin confirmé"]], "pipe": [["Recon", "done"], ["Accès initial", "done"], ["Élévation priv.", "active"], ["Latéralisation", "todo"], ["Rapport", "todo"]], "term": [["$", "recon — 1 842 endpoints énumérés en 11 min"], [">", "injection SQL confirmée (PoC en sandbox, zéro impact)"], [">", "chaînage : injection + mauvaise config IAM → compte admin"], ["$", "rapport généré — 7 findings, étapes de reproduction incluses"]], "agent": "L’agent a validé chaque trouvaille par preuve de concept inoffensive sous couche de sécurité — zéro faux positif dans le rapport final.", "top5": [["YesWeHack", "Plateforme de bug bounty européenne n°1, communauté mondiale de hackers éthiques.", "FR"], ["Yogosha", "Bug bounty privé + pentest as a service, élite de hackers sélectionnés.", "FR"], ["Patrowl", "Scan offensif continu et tests automatisés en SaaS souverain.", "FR"], ["Sekost", "Acteur souverain du test et de la détection (Cyber Panorama CESIN).", "FR"], ["TrustInSoft", "Analyse de code à garantie mathématique pour logiciels critiques.", "FR"]]}, "gov": {"appTitle": "Pilotage conformité — multi-référentiels", "type": "grc", "donut": {"pct": 87, "label": "contrôles couverts"}, "kpis": [["4", "référentiels mappés"], ["23", "écarts priorisés à traiter"]], "fw": [["ISO 27001", 94, "ok"], ["NIS2", 71, "warn"], ["DORA", 58, "risk"], ["PSSI interne", 90, "ok"]], "agent": "L’IA a mappé un même contrôle d’accès sur ISO 27001, NIS2 et DORA, puis rédigé le plan de remédiation des 23 écarts, priorisés par criticité métier.", "top5": [["Tenacy", "Plateforme GRC française, hébergée en France, pilotage et automatisation de la conformité.", "FR"], ["Egerie", "Analyse et quantification du risque, référence GRC souveraine pour grands comptes.", "FR"], ["Citalid", "Quantification financière du risque cyber pilotée par la threat intelligence.", "FR"], ["Board of Cyber", "Mesure continue de la performance cyber et reporting pour piloter la posture.", "FR"], ["Wallix", "Gouvernance des accès à privilèges (PAM), brique clé de la conformité.", "FR"]]}};
+let activeDomain='vuln', activeSov=1;
+const zoneFromValue = v => v < 34 ? 0 : v < 67 ? 1 : 2;
+const ZONE_CENTER = [10, 50, 90];
+
+const domainsEl=document.getElementById('domains');
+DOMAINS.forEach(d=>{
+  const btn=document.createElement('button');
+  btn.className='domain'+(d.id===activeDomain?' active':'');
+  btn.setAttribute('data-id',d.id);
+  btn.setAttribute('aria-pressed',d.id===activeDomain);
+  const tagClass=d.stance==='off'?'off':d.stance==='def'?'def':'both';
+  btn.innerHTML=`<div class="dname">${d.name}</div><span class="tag ${tagClass}">${d.stanceLabel}</span>`;
+  btn.addEventListener('click',()=>{activeDomain=d.id;syncDomains();render();});
+  domainsEl.appendChild(btn);
+});
+function syncDomains(){
+  document.querySelectorAll('.domain').forEach(b=>{
+    const on=b.getAttribute('data-id')===activeDomain;
+    b.classList.toggle('active',on);b.setAttribute('aria-pressed',on);
+  });
+}
+
+const sovEl=document.getElementById('sov'), sovTicks=document.getElementById('sovTicks');
+sovEl.addEventListener('input',()=>{
+  const z=zoneFromValue(+sovEl.value);
+  if(z!==activeSov){activeSov=z;syncTicks();renderSov();}
+});
+sovTicks.querySelectorAll('.sov-tick').forEach(t=>{
+  t.addEventListener('click',()=>{
+    activeSov=+t.getAttribute('data-i');
+    sovEl.value=ZONE_CENTER[activeSov];
+    syncTicks();renderSov();
+  });
+});
+function syncTicks(){
+  sovTicks.querySelectorAll('.sov-tick').forEach(t=>t.classList.toggle('on',+t.getAttribute('data-i')===activeSov));
+  const st=document.getElementById('sovState');
+  st.textContent=SOV[activeSov].key.toUpperCase();
+  st.style.color=SOV[activeSov].color;
+  sovEl.setAttribute('aria-valuetext',SOV[activeSov].key);
+}
+
+const stanceColor={off:'var(--offensive)',def:'var(--defensive)',both:'var(--signal)'};
+
+function renderSov(){
+  const s=SOV[activeSov];
+  const el=document.getElementById('sovCard');
+  if(!el) return;
+  el.style.setProperty('--rec',s.color);
+  el.innerHTML=`
+    <div class="rec-tier"><span class="rec-dot"></span><span class="rec-name">${s.tier}</span></div>
+    <p class="rec-context">${s.context}${s.srcKeys.map(k=>' '+cite(k)).join('')}</p>
+    <div class="rec-archetype">→ ${s.archetype}</div>
+    <p class="rec-why">${s.why}</p>
+    <div class="mapping">
+      <div class="map-col"><div class="map-lbl">État de l'art international</div><div class="map-val">${s.us}</div></div>
+      <div class="map-arrow">→</div>
+      <div class="map-col sov"><div class="map-lbl">Option souveraine</div><div class="map-val">${s.sovereign}${s.srcKeys.includes('anssi')?' '+cite('anssi'):''}</div></div>
+    </div>`;
+}
+
+function render(){
+  const d=DOMAINS.find(x=>x.id===activeDomain);
+  document.getElementById('output').innerHTML=`
+    <div class="out-head">
+      <span class="lbl">Où l'IA s'applique — ${d.name}</span>
+      <span class="line"></span>
+      <span class="stance" style="color:${stanceColor[d.stance]}">${d.stanceLabel}</span>
+    </div>
+    <div class="grid">
+      <div class="card">
+        <h4>Où ça s'applique</h4>
+        <ul class="applies">${d.applies.map(a=>`<li><b>${a[0]}.</b> ${a[1]}</li>`).join('')}</ul>
+      </div>
+      <div class="card">
+        <h4>Comment c'est construit</h4>
+        <div class="mech">${d.mech.map(m=>`<span class="chip">${m}</span>`).join('')}</div>
+        <h4 style="margin-top:6px">Le chiffre qui compte</h4>
+        <div class="gain"><span class="num">${d.gain[0]}</span><span class="unit">${d.gain[1]}</span></div>
+        <div class="gain-note">Source : ${cite(d.gainSrc)}</div>
+      </div>
+      <div class="card full sov-rec" id="sovCard"></div>
+    </div>
+    <div class="deep">
+      ${d.deep.map((x,i)=>`
+        <details class="acc"${i===0?' open':''}>
+          <summary><span class="ico">+</span>${x.t}<span class="num">0${i+1}</span></summary>
+          <div class="acc-body"><p>${x.b}</p></div>
+        </details>`).join('')}
+    </div>
+    ${renderApp(d.id)}
+    ${renderTop5(d.id)}
+  `;
+  renderSov();
+}
+
+function renderApp(id){
+  const e=EXT[id]; if(!e) return '';
+  const stCls={ok:'st-ok',warn:'st-warn',risk:'st-risk'};
+  const frame = inner => `
+    <div class="app-frame">
+      <div class="app-bar">
+        <span class="app-dots"><i></i><i></i><i></i></span>
+        <span class="app-name">${e.appTitle}</span>
+        <span class="app-live">● live</span>
+      </div>
+      <div class="app-body">${inner}
+        <div class="app-agent"><span class="ag-badge">AGENT IA</span>${e.agent}</div>
+      </div>
+    </div>`;
+  const kpis = `<div class="app-kpis k2">${e.kpis.map(k=>`<div class="kpi"><div class="kpi-n">${k[0]}</div><div class="kpi-l">${k[1]}</div></div>`).join('')}</div>`;
+
+  if(e.type==='rating'){
+    return frame(`
+      <div class="dash-grid">
+        <div class="ring-box">
+          <div class="ring" style="--p:${e.score.num}"><div class="ring-in"><div class="ring-grade">${e.score.grade}</div><div class="ring-num">${e.score.num}/100</div></div></div>
+          <div class="ring-trend">↗ ${e.score.trend}</div>
+        </div>
+        <div class="dash-col">
+          ${kpis}
+          <div class="sup-rows">
+            ${e.suppliers.map(r=>`<div class="sup-row"><span class="grade ${stCls[r[2]]}">${r[1]}</span><span class="sup-name">${r[0]}</span><span class="sup-note">${r[3]}</span></div>`).join('')}
+          </div>
+        </div>
+      </div>
+      <div class="docbar"><div class="docbar-head"><span>Analyse documentaire IA</span><span>${e.doc.pct}%</span></div><div class="docbar-track"><i style="width:${e.doc.pct}%"></i></div><div class="docbar-lbl">${e.doc.label}</div></div>`);
+  }
+
+  if(e.type==='soc'){
+    const max=Math.max(...e.sev.map(x=>x[1]));
+    return frame(`
+      <div class="dash-grid">
+        <div class="dash-col">
+          <div class="blk-lbl">Alertes par sévérité — 24h</div>
+          <div class="sevchart">${e.sev.map(x=>`<div class="sev"><i class="${stCls[x[2]]}" style="height:${Math.round(x[1]/max*100)}%"></i><span class="sev-n">${x[1]}</span><span class="sev-l">${x[0]}</span></div>`).join('')}</div>
+          ${kpis}
+        </div>
+        <div class="dash-col">
+          <div class="blk-lbl">File de triage — temps réel</div>
+          <div class="feed">
+            ${e.feed.map(f=>`<div class="feed-row"><span class="f-time">${f[0]}</span><span class="f-title">${f[1]}</span><span class="f-verdict ${stCls[f[3]]}">${f[2]}</span></div>`).join('')}
+          </div>
+        </div>
+      </div>`);
+  }
+
+  if(e.type==='easm'){
+    return frame(`
+      <div class="dash-grid">
+        <div class="dash-col">
+          <div class="blk-lbl">Cartographie des actifs exposés</div>
+          <div class="heat">${e.tiles.map(t=>`<div class="tile ${stCls[t[1]]}">${t[0]}</div>`).join('')}</div>
+          <div class="heat-legend"><span class="st-risk">■ critique</span><span class="st-warn">■ à surveiller</span><span class="st-ok">■ maîtrisé</span></div>
+        </div>
+        <div class="dash-col">
+          ${kpis}
+          <div class="blk-lbl">Expositions priorisées par l'IA</div>
+          <div class="expo">
+            ${e.expo.map(x=>`<div class="expo-row"><span class="expo-name">${x[0]}</span><span class="expo-score ${stCls[x[2]]}">${x[1]}</span></div>`).join('')}
+          </div>
+        </div>
+      </div>`);
+  }
+
+  if(e.type==='offsec'){
+    return frame(`
+      <div class="pipe">
+        ${e.pipe.map((p,i)=>`<div class="pipe-step ${p[1]}">${i<e.pipe.length-1?'<i class="pipe-link"></i>':''}<span class="pipe-dot"></span><span class="pipe-lbl">${p[0]}</span></div>`).join('')}
+      </div>
+      <div class="dash-grid">
+        <div class="dash-col">
+          <div class="term">${e.term.map(l=>`<div class="term-line"><span class="term-p">${l[0]}</span>${l[1]}</div>`).join('')}</div>
+        </div>
+        <div class="dash-col">${kpis.replace('k2','k2 kv')}</div>
+      </div>`);
+  }
+
+  if(e.type==='grc'){
+    return frame(`
+      <div class="dash-grid">
+        <div class="ring-box">
+          <div class="ring g" style="--p:${e.donut.pct}"><div class="ring-in"><div class="ring-grade">${e.donut.pct}%</div><div class="ring-num">${e.donut.label}</div></div></div>
+        </div>
+        <div class="dash-col">
+          ${kpis}
+          <div class="fw">
+            ${e.fw.map(f=>`<div class="fw-row"><span class="fw-name">${f[0]}</span><div class="fw-track"><i class="${stCls[f[2]]}" style="width:${f[1]}%"></i></div><span class="fw-pct">${f[1]}%</span></div>`).join('')}
+          </div>
+        </div>
+      </div>`);
+  }
+  return '';
+}
+
+function renderTop5(id){
+  const e=EXT[id]; if(!e) return '';
+  return `
+    <div class="top5">
+      <div class="top5-head">
+        <h4>Top 5 souverain — implémenter ce périmètre</h4>
+        <span class="top5-note">sélection raisonnée d'acteurs souverains, non un benchmark</span>
+      </div>
+      <ol class="top5-list">
+        ${e.top5.map((t,i)=>`
+          <li class="top5-item${i===0?' lead':''}">
+            <span class="t5-rank">${i+1}</span>
+            <span class="t5-main"><span class="t5-name">${t[0]}</span><span class="t5-desc">${t[1]}</span></span>
+            <span class="t5-flag">${t[2]}</span>
+          </li>`).join('')}
+      </ol>
+    </div>`;
+}
+
+/* sources registry */
+document.getElementById('srcList').innerHTML = Object.values(SRC)
+  .sort((a,b)=>a.n-b.n)
+  .map(s=>`<li><span class="n">[${s.n}]</span><span><span class="org">${s.org}</span> — <a href="${s.url}" target="_blank" rel="noopener">${s.label}</a></span></li>`)
+  .join('');
+
+syncTicks();
+render();
+</script>
+</body>
+</html>
